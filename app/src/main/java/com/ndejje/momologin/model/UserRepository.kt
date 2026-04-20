@@ -1,0 +1,24 @@
+package com.ndejje.momologin.model
+
+class UserRepository(private val userDao: UserDao) {
+    private fun hashPassword(password: String): String = password.hashCode().toString()
+
+    suspend fun registerUser(
+        fullName: String, username: String,
+        email: String, password: String
+    ): Boolean {
+        if (userDao.findByUsername(username) != null) return false
+        val rowId = userDao.insertUser(
+            UserEntity(
+                fullName = fullName,
+                username = username,
+                email = email,
+                passwordHash = hashPassword(password)
+            )
+        )
+        return rowId != -1L
+    }
+
+    suspend fun loginUser(username: String, password: String): UserEntity? =
+        userDao.login(username = username, passwordHash = hashPassword(password))
+}
